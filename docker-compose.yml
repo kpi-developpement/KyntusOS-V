@@ -6,10 +6,10 @@ services:
       context: ./excel-processor
       dockerfile: Dockerfile
     container_name: kyntus_backend
-    ports:
-      - "8081:8081"
     restart: unless-stopped
-    # Had l'option bach Spring Boot yl9a l'memoire kofia yscanni l'Excel
+    ports:
+      # Optionnel: y9der Omar yt-testi API nichan f 8085 ila bgha
+      - "8085:8081" 
     deploy:
       resources:
         limits:
@@ -21,7 +21,11 @@ services:
       dockerfile: Dockerfile
     container_name: kyntus_frontend
     ports:
-      - "80:3000" # Hna l'Herba: Radina port 3000 yban f port 80 (HTTP normal)
+      # L'Host ghadi ychouf 3005 (Kima mtaf9in f Tsawer)
+      - "3005:3000"
+    environment:
+      # DNS dyal Docker kay-traduj 'backend' l'IP interne dyal Spring Boot!
+      - BACKEND_URL=http://backend:8081
     depends_on:
       - backend
     restart: unless-stopped
