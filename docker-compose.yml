@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./excel-processor
+      dockerfile: Dockerfile
+    container_name: kyntus_backend
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    # Had l'option bach Spring Boot yl9a l'memoire kofia yscanni l'Excel
+    deploy:
+      resources:
+        limits:
+          memory: 1G 
+
+  frontend:
+    build:
+      context: ./app-frontend
+      dockerfile: Dockerfile
+    container_name: kyntus_frontend
+    ports:
+      - "80:3000" # Hna l'Herba: Radina port 3000 yban f port 80 (HTTP normal)
+    depends_on:
+      - backend
+    restart: unless-stopped
