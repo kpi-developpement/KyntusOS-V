@@ -8,7 +8,7 @@ services:
     container_name: kyntus_backend
     restart: unless-stopped
     ports:
-      # Optionnel: y9der Omar yt-testi API nichan f 8085 ila bgha
+      # L'Backend m7loul l'Serveur f 8085
       - "8085:8081" 
     deploy:
       resources:
@@ -19,13 +19,17 @@ services:
     build:
       context: ./app-frontend
       dockerfile: Dockerfile
+      # 🔥 THE FIX: Injection dyal l'IP d'l'VPS f waqt l'Build bach Chrome y3ref tri9
+      args:
+        # Bddel 10.10.10.50 b l'IP d'charika ila kan beddelouh, w l'Port houwa 8085
+        - NEXT_PUBLIC_API_URL=http://10.10.10.50:8085
     container_name: kyntus_frontend
     ports:
-      # L'Host ghadi ychouf 3005 (Kima mtaf9in f Tsawer)
       - "3005:3000"
     environment:
-      # DNS dyal Docker kay-traduj 'backend' l'IP interne dyal Spring Boot!
+      # Ila 3ndk chi code Server-Side (getServerSideProps/API Routes) f Next.js, hadi ghat-nff3o
       - BACKEND_URL=http://backend:8081
+      - NEXT_PUBLIC_API_URL=http://10.10.10.50:8085
     depends_on:
       - backend
     restart: unless-stopped
