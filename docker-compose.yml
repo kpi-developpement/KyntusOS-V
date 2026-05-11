@@ -1,35 +1,45 @@
+# 🔥 KYNTUS OS RECORD - PROD CONFIGURATION (FORCE UPDATE TRIGGER)
 version: '3.8'
 
 services:
+  # 1. Le Backend (Spring Boot) - MODE PRODUCTION
   backend:
     build:
-      context: ./excel-processor
+      context: ./operatingsystem
       dockerfile: Dockerfile
-    container_name: kyntus_backend
-    restart: unless-stopped
+    container_name: kyntus_record_backend
+    restart: always
     ports:
-      # L'Backend m7loul l'Serveur f 8085
-      - "8085:8081" 
-    deploy:
-      resources:
-        limits:
-          memory: 1G 
+      - "8083:8083"
+    environment:
+      # 🔥 CONNECTION NISHAN L'SERVEUR PROD (10.10.10.50)
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://10.10.10.50:5432/kyntus_db?reWriteBatchedInserts=true
+      - SPRING_DATASOURCE_USERNAME=kyntus_user
+      - SPRING_DATASOURCE_PASSWORD=kyntus_password
+      # ⚠️ CRITIQUE: 'none' bach may-msse7ch/may-9issch les tables dyal App 1 f Prod!
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    networks:
+      - kyntus-record-network
 
+  # 2. Le Frontend (Next.js) - MODE PRODUCTION
   frontend:
     build:
-      context: ./app-frontend
+      context: ./kyntus-os-frontend
       dockerfile: Dockerfile
-      # 🔥 THE FIX: Injection dyal l'IP d'l'VPS f waqt l'Build bach Chrome y3ref tri9
       args:
-        # Bddel 10.10.10.50 b l'IP d'charika ila kan beddelouh, w l'Port houwa 8085
-        - NEXT_PUBLIC_API_URL=http://10.10.10.50:8085
-    container_name: kyntus_frontend
+        # 🔥 Injection dyal l'IP d'l'VPS bach Next.js y-tbuilda 3lih
+        - NEXT_PUBLIC_API_URL=http://10.10.10.50:8083
+    container_name: kyntus_record_frontend
+    restart: always
     ports:
-      - "3005:3000"
+      - "3030:3000"
     environment:
-      # Ila 3ndk chi code Server-Side (getServerSideProps/API Routes) f Next.js, hadi ghat-nff3o
-      - BACKEND_URL=http://backend:8081
-      - NEXT_PUBLIC_API_URL=http://10.10.10.50:8085
+      - NEXT_PUBLIC_API_URL=http://10.10.10.50:8083
     depends_on:
       - backend
-    restart: unless-stopped
+    networks:
+      - kyntus-record-network
+
+networks:
+  kyntus-record-network:
+    driver: bridge
