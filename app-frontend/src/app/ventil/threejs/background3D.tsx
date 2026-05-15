@@ -41,7 +41,8 @@ function RoyalBlueWave() {
   return (
     <points ref={pointsRef} position={[0, -8, -40]}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
+        {/* 🔥 THE FIX: N-khedmou 'args' li kay-3yt l'constructeur d' THREE.BufferAttribute direct */}
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       {/* Royal Blue color l'mouja */}
       <pointsMaterial size={0.15} color="#2563eb" transparent opacity={0.6} sizeAttenuation />
