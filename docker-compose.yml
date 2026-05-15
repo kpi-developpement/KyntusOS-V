@@ -5,41 +5,41 @@ services:
     build:
       context: ./excel-processor
       dockerfile: Dockerfile
-    # 🔥 THE FIX 1: Smiya jdida unique bach n-khliw App 1 trankil
-    container_name: kyntus_os_backend_v2
+    # 🔥 Smiya jdida (V3) bach n-tfadaw ay fantôme f l'serveur
+    container_name: kyntus_backend_v3_omega
     restart: unless-stopped
     ports:
-      # Optionnel: y9der Omar yt-testi API nichan f 8085
-      - "8085:8081" 
+      # 🔥 Port Houbel (8779) li 9tare7ti, b3id 3la sda3
+      - "8779:8081" 
     deploy:
       resources:
         limits:
           memory: 1G 
     networks:
-      - kyntus-v2-network
+      - kyntus-v3-network
 
   frontend:
     build:
       context: ./app-frontend
       dockerfile: Dockerfile
-      # 🔥 THE FIX 2: L'Injection darouriya bach Client (Browser) y3ref l'Backend
       args:
-        - NEXT_PUBLIC_API_URL=http://10.10.10.50:8085
-    # 🔥 THE FIX 1: Smiya jdida unique l'Frontend
-    container_name: kyntus_os_frontend_v2
+        # 🔥 THE FIX: Hna fin kan-goulou l'Next.js y-nsa localhost w y-hder m3a 8779
+        - NEXT_PUBLIC_API_URL=http://10.10.10.50:8779
+    # 🔥 Smiya jdida (V3) l'Frontend
+    container_name: kyntus_frontend_v3_omega
     ports:
-      # L'Host ghadi ychouf 3005
-      - "3005:3000"
+      # 🔥 Port Houbel (3779) l'Frontend bach n-kounou haniyin 1000%
+      - "3779:3000"
     environment:
-      # DNS dyal Docker kay-traduj 'backend' l'IP interne dyal Spring Boot (pour SSR)
+      # Hadi kat-b9a 8081 7it DNS interne d'Docker (pour Server-Side Rendering)
       - BACKEND_URL=http://backend:8081
     depends_on:
       - backend
     restart: unless-stopped
     networks:
-      - kyntus-v2-network
+      - kyntus-v3-network
 
-# 🔥 THE FIX 3: Réseau jdid m3zoul (Isolated) bach App 2 t-hder m3a b3diyat'ha b slama
+# 🔥 Réseau jdid m3zoul
 networks:
-  kyntus-v2-network:
+  kyntus-v3-network:
     driver: bridge
