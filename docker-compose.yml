@@ -1,45 +1,31 @@
-# 🔥 KYNTUS OS RECORD - PROD CONFIGURATION (FORCE UPDATE TRIGGER)
 version: '3.8'
 
 services:
-  # 1. Le Backend (Spring Boot) - MODE PRODUCTION
   backend:
     build:
-      context: ./operatingsystem
+      context: ./excel-processor
       dockerfile: Dockerfile
-    container_name: kyntus_record_backend
-    restart: always
+    container_name: kyntus_backend
+    restart: unless-stopped
     ports:
-      - "8083:8083"
-    environment:
-      # 🔥 CONNECTION NISHAN L'SERVEUR PROD (10.10.10.50)
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://10.10.10.50:5432/kyntus_db?reWriteBatchedInserts=true
-      - SPRING_DATASOURCE_USERNAME=kyntus_user
-      - SPRING_DATASOURCE_PASSWORD=kyntus_password
-      # ⚠️ CRITIQUE: 'none' bach may-msse7ch/may-9issch les tables dyal App 1 f Prod!
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
-    networks:
-      - kyntus-record-network
+      # Optionnel: y9der Omar yt-testi API nichan f 8085 ila bgha
+      - "8085:8081" 
+    deploy:
+      resources:
+        limits:
+          memory: 1G 
 
-  # 2. Le Frontend (Next.js) - MODE PRODUCTION
   frontend:
     build:
-      context: ./kyntus-os-frontend
+      context: ./app-frontend
       dockerfile: Dockerfile
-      args:
-        # 🔥 Injection dyal l'IP d'l'VPS bach Next.js y-tbuilda 3lih
-        - NEXT_PUBLIC_API_URL=http://10.10.10.50:8083
-    container_name: kyntus_record_frontend
-    restart: always
+    container_name: kyntus_frontend
     ports:
-      - "3030:3000"
+      # L'Host ghadi ychouf 3005 (Kima mtaf9in f Tsawer)
+      - "3005:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://10.10.10.50:8083
+      # DNS dyal Docker kay-traduj 'backend' l'IP interne dyal Spring Boot!
+      - BACKEND_URL=http://backend:8081
     depends_on:
       - backend
-    networks:
-      - kyntus-record-network
-
-networks:
-  kyntus-record-network:
-    driver: bridge
+    restart: unless-stopped
