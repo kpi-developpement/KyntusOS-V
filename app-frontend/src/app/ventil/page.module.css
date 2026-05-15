@@ -1,0 +1,375 @@
+.mainContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, sans-serif;
+  overflow: hidden;
+}
+
+.kyntusTitle {
+  font-size: 3.5rem;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: -1px;
+  margin-bottom: 5px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e3a8a 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 6s linear infinite;
+}
+
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+
+@keyframes shine {
+  to { background-position: 200% center; }
+}
+
+.uploadBox {
+  border-radius: 24px;
+  padding: 40px 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 1), 0 10px 20px -5px rgba(37, 99, 235, 0.05);
+  cursor: pointer;
+  margin-bottom: 30px;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  perspective: 600px; /* Darouriya l'icone 3D */
+}
+
+.uploadBox:hover {
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.15), inset 0 0 0 2px rgba(37, 99, 235, 0.1);
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* =========================================
+   ICÔNE DOSSIER 3D (PURE CSS) 
+   ========================================= */
+.css3dFolder {
+  position: relative;
+  width: 70px;
+  height: 50px;
+  margin: 0 auto 20px auto;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.uploadBox:hover .css3dFolder {
+  transform: translateY(-5px) scale(1.05) rotateX(10deg);
+}
+
+/* Dos du dossier */
+.folderBack {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 40px;
+  background: #1e3a8a; /* Deep Blue */
+  border-radius: 6px 6px 10px 10px;
+  transform: translateZ(-15px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* L'onglet du dossier */
+.folderBack::before {
+  content: "";
+  position: absolute;
+  top: -8px; left: 0;
+  width: 25px; height: 10px;
+  background: #1e3a8a;
+  border-radius: 6px 6px 0 0;
+}
+
+/* La feuille à l'intérieur */
+.folderPaper {
+  position: absolute;
+  bottom: 5px; left: 10%;
+  width: 80%; height: 35px;
+  background: linear-gradient(to bottom, #ffffff, #e2e8f0);
+  border-radius: 4px;
+  transform: translateZ(-5px);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+}
+
+.uploadBox:hover .folderPaper {
+  transform: translateZ(-5px) translateY(-15px); /* Katl3 f l'hover */
+}
+
+/* Devant du dossier */
+.folderFront {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 35px;
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+  border-radius: 6px 6px 10px 10px;
+  transform-origin: bottom;
+  transform: translateZ(5px) rotateX(-20deg);
+  box-shadow: 0 15px 20px -5px rgba(37, 99, 235, 0.4);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.uploadBox:hover .folderFront {
+  transform: translateZ(5px) rotateX(-40deg); /* Kayt7el f l'hover */
+}
+
+.uploadLabel {
+  color: #1e3a8a;
+  font-size: 1.1rem;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.fileInput {
+  display: none;
+}
+
+/* =========================================
+   ICÔNE FICHIER 3D (PURE CSS) 
+   ========================================= */
+.selectedFile {
+  color: #1e40af;
+  font-weight: 700;
+  margin-top: -15px;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 1rem;
+  background: rgba(219, 234, 254, 0.5);
+  padding: 14px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(191, 219, 254, 1);
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.css3dFile {
+  position: relative;
+  width: 20px;
+  height: 28px;
+  background: linear-gradient(135deg, #ffffff 0%, #bfdbfe 100%);
+  border-radius: 3px;
+  box-shadow: 2px 4px 8px rgba(30, 58, 138, 0.2), inset -1px -1px 2px rgba(255,255,255,0.8);
+  transform-style: preserve-3d;
+  transform: rotateY(-15deg) rotateX(10deg);
+}
+
+/* Le coin plié du fichier */
+.css3dFile::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  border-width: 0 10px 10px 0;
+  border-style: solid;
+  border-color: transparent transparent #93c5fd #93c5fd;
+  box-shadow: -1px 1px 2px rgba(0,0,0,0.1);
+  border-radius: 0 0 0 2px;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 18px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: #1e3a8a;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.submitBtn::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 50%, #1e3a8a 100%);
+  background-size: 200% auto;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.submitBtn span {
+  position: relative;
+  z-index: 2;
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.5);
+}
+
+.submitBtn:hover:not(:disabled)::before {
+  opacity: 1;
+  animation: shine 2s linear infinite;
+}
+
+.submitBtn:disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message {
+  margin-top: 25px;
+  text-align: center;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+}
+
+.error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.success {
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+/* ... (khli l'CSS li 9bl kima rah) ... */
+
+/* =========================================
+   TABLEAU DES RÉSULTATS x400
+   ========================================= */
+.resultsContainer {
+  width: 100%;
+  margin-top: 20px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.tableWrapper {
+  max-height: 350px;
+  overflow-y: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 1), 0 10px 20px -5px rgba(37, 99, 235, 0.05);
+  margin-bottom: 25px;
+}
+
+/* Scrollbar styling */
+.tableWrapper::-webkit-scrollbar {
+  width: 8px;
+}
+.tableWrapper::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.02);
+  border-radius: 10px;
+}
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.2);
+  border-radius: 10px;
+}
+
+.premiumTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.premiumTable th {
+  background: rgba(241, 245, 249, 0.9);
+  padding: 16px 20px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(37, 99, 235, 0.1);
+}
+
+.premiumTable td {
+  padding: 14px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  transition: background 0.2s ease;
+}
+
+.premiumTable tr:hover td {
+  background: rgba(37, 99, 235, 0.03);
+  color: #1e3a8a;
+}
+
+/* Bouton de Téléchargement Secondaire */
+.downloadBtn {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #2563eb;
+  border-radius: 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(30, 58, 138, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.downloadBtn:hover {
+  background: #2563eb;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.25);
+}
+
+.resetBtn {
+  margin-top: 15px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.resetBtn:hover {
+  color: #1e3a8a;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
