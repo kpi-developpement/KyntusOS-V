@@ -75,6 +75,7 @@ public class ExcelHelper {
                     for (int i = 0; i < cols.length; i++) {
                         if (cols[i] == null) continue;
                         String header = cols[i].trim().replace("\"", "");
+                        // F l'CSV n9edrou nkhliw Mt SST hit kanchadou mnha l'colonne kamla
                         if (header.equalsIgnoreCase("Mt SST") || header.equalsIgnoreCase("Total BR") || header.equalsIgnoreCase("Somme de Mt SST")) {
                             targetIndex = i;
                             hasValidColumn = true;
@@ -126,17 +127,30 @@ public class ExcelHelper {
                             if (cell.getCellType() == CellType.STRING) {
                                 String cellValue = cell.getStringCellValue();
 
-                                if (cellValue != null && (cellValue.trim().equalsIgnoreCase("Total BR") || cellValue.trim().equalsIgnoreCase("Mt SST"))) {
+                                // 🚨 L'HERBA HNA: Chercher STRICTEMENT "Total BR" w n7iydou les espaces zaydin
+                                if (cellValue != null && cellValue.trim().replace(":", "").trim().equalsIgnoreCase("Total BR")) {
 
                                     Cell valueCell = row.getCell(cell.getColumnIndex() + 1);
 
                                     if (valueCell != null) {
-                                        if (valueCell.getCellType() == CellType.NUMERIC) {
-                                            totalBrValue = valueCell.getNumericCellValue();
-                                        } else {
-                                            String rawValue = valueCell.getStringCellValue();
-                                            totalBrValue = parseMoney(rawValue);
+                                        String rawValue = "";
+                                        try {
+                                            if (valueCell.getCellType() == CellType.NUMERIC) {
+                                                rawValue = String.valueOf(valueCell.getNumericCellValue());
+                                            } else if (valueCell.getCellType() == CellType.FORMULA) {
+                                                if (valueCell.getCachedFormulaResultType() == CellType.NUMERIC) {
+                                                    rawValue = String.valueOf(valueCell.getNumericCellValue());
+                                                } else {
+                                                    rawValue = valueCell.getStringCellValue();
+                                                }
+                                            } else {
+                                                rawValue = valueCell.getStringCellValue();
+                                            }
+                                        } catch (Exception e) {
+                                            rawValue = valueCell.toString();
                                         }
+                                        // On utilise le parseur intelligent
+                                        totalBrValue = parseMoney(rawValue);
                                     }
                                     found = true;
                                     System.out.println("✅ " + sheetName + " -> " + totalBrValue);
@@ -169,10 +183,8 @@ public class ExcelHelper {
 
             Sheet sheet = workbook.createSheet("Recap Total BR");
 
-            // 🚀 L'HERBA HNA: Création dyal Style pour forcer l'espace f les milliers f l'Excel
             CellStyle numberStyle = workbook.createCellStyle();
             DataFormat format = workbook.createDataFormat();
-            // Le format "# ##0.##" kay-obliger Excel y-dir espace f l'alaf (ex: 2 885 wla 2 885.5)
             numberStyle.setDataFormat(format.getFormat("# ##0.##"));
 
             Row headerRow = sheet.createRow(0);
@@ -187,10 +199,8 @@ public class ExcelHelper {
                 Cell valueCell = row.createCell(1);
                 if (dto.getTotalBr() != null && dto.getTotalBr() != 0.0) {
                     valueCell.setCellValue(dto.getTotalBr());
-                    // Appliquer l'style dyal l'espace
                     valueCell.setCellStyle(numberStyle);
                 } else {
-                    // Ila kan 0 awla vide ndiro tiré bhalma tlbti f l'frontend
                     valueCell.setCellValue("-");
                 }
             }
