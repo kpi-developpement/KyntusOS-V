@@ -21,15 +21,13 @@ export default function VentilPage() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 🚀 L'HERBA HNA: Fonction stricte bach t-affichi l'nombre exactement ki bghitoh (b espace)
+  // 🚀 THE FIX: Arrondi strict bla fasila + Espace des milliers + € f lakher
   const formatExactNumber = (num: number) => {
-    if (num === 0) return "-";
-    // N-far9ou l'nombre 3la l'fasila ila kant
-    const parts = num.toString().split(".");
-    // N-zidou espace kol 3 d l'arqam f l'partie s7i7a
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-    // N-jm3ouhom b point (awla tqder t-bdelha b virgule ila bghiti parts.join(","))
-    return parts.join(".");
+    if (!num || num === 0) return "-";
+    // N-arrondiw l'flous bach maytb9a hta 7aja mor l'fasila
+    const roundedNum = Math.round(num);
+    // N-zidou espace kol 3 d l'arqam w nzido €
+    return roundedNum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €";
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,7 +179,7 @@ export default function VentilPage() {
                     <tr key={idx}>
                       <td>{item.sheetName}</td>
                       <td>
-                        {/* 🚀 Affichage exact b l'espace */}
+                        {/* 🚀 Affichage exact (2 885 €) */}
                         {formatExactNumber(item.totalBr)}
                       </td>
                     </tr>

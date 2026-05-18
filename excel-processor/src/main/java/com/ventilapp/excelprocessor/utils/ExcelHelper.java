@@ -75,7 +75,6 @@ public class ExcelHelper {
                     for (int i = 0; i < cols.length; i++) {
                         if (cols[i] == null) continue;
                         String header = cols[i].trim().replace("\"", "");
-                        // F l'CSV n9edrou nkhliw Mt SST hit kanchadou mnha l'colonne kamla
                         if (header.equalsIgnoreCase("Mt SST") || header.equalsIgnoreCase("Total BR") || header.equalsIgnoreCase("Somme de Mt SST")) {
                             targetIndex = i;
                             hasValidColumn = true;
@@ -127,7 +126,6 @@ public class ExcelHelper {
                             if (cell.getCellType() == CellType.STRING) {
                                 String cellValue = cell.getStringCellValue();
 
-                                // 🚨 L'HERBA HNA: Chercher STRICTEMENT "Total BR" w n7iydou les espaces zaydin
                                 if (cellValue != null && cellValue.trim().replace(":", "").trim().equalsIgnoreCase("Total BR")) {
 
                                     Cell valueCell = row.getCell(cell.getColumnIndex() + 1);
@@ -149,7 +147,6 @@ public class ExcelHelper {
                                         } catch (Exception e) {
                                             rawValue = valueCell.toString();
                                         }
-                                        // On utilise le parseur intelligent
                                         totalBrValue = parseMoney(rawValue);
                                     }
                                     found = true;
@@ -183,9 +180,10 @@ public class ExcelHelper {
 
             Sheet sheet = workbook.createSheet("Recap Total BR");
 
+            // 🚀 THE FIX: Création d'un format entier b l'espace w l'Euro "2 885 €"
             CellStyle numberStyle = workbook.createCellStyle();
             DataFormat format = workbook.createDataFormat();
-            numberStyle.setDataFormat(format.getFormat("# ##0.##"));
+            numberStyle.setDataFormat(format.getFormat("#,##0\" €\""));
 
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue("Partenaire (Feuille)");
@@ -198,7 +196,8 @@ public class ExcelHelper {
 
                 Cell valueCell = row.createCell(1);
                 if (dto.getTotalBr() != null && dto.getTotalBr() != 0.0) {
-                    valueCell.setCellValue(dto.getTotalBr());
+                    // On arrondi hna b Math.round bach Excel may-ktbch l'fasila mkhbya f la mémoire
+                    valueCell.setCellValue(Math.round(dto.getTotalBr()));
                     valueCell.setCellStyle(numberStyle);
                 } else {
                     valueCell.setCellValue("-");
