@@ -21,6 +21,17 @@ export default function VentilPage() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 🚀 L'HERBA HNA: Fonction stricte bach t-affichi l'nombre exactement ki bghitoh (b espace)
+  const formatExactNumber = (num: number) => {
+    if (num === 0) return "-";
+    // N-far9ou l'nombre 3la l'fasila ila kant
+    const parts = num.toString().split(".");
+    // N-zidou espace kol 3 d l'arqam f l'partie s7i7a
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    // N-jm3ouhom b point (awla tqder t-bdelha b virgule ila bghiti parts.join(","))
+    return parts.join(".");
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
@@ -54,8 +65,6 @@ export default function VentilPage() {
     formData.append("file", file);
 
     try {
-      // 🚀 THE FIX: L'API url katji mn l'environnement (.env.local awla Docker args)
-      // F l'Production ghadi tkon: http://10.10.10.50:8779/api/excel/process
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const apiUrl = backendUrl ? `${backendUrl}/api/excel/process` : "/api/excel/process";
 
@@ -172,7 +181,8 @@ export default function VentilPage() {
                     <tr key={idx}>
                       <td>{item.sheetName}</td>
                       <td>
-                        {item.totalBr === 0 ? "-" : new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(item.totalBr)}
+                        {/* 🚀 Affichage exact b l'espace */}
+                        {formatExactNumber(item.totalBr)}
                       </td>
                     </tr>
                   ))}

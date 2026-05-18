@@ -20,6 +20,41 @@ public class ExcelHelper {
         return extractFromXlsx(file);
     }
 
+    private static Double parseMoney(String raw) {
+        if (raw == null || raw.trim().isEmpty() || raw.equals("-")) return 0.0;
+
+        String s = raw.replaceAll("[\\s€$a-zA-Z]", "");
+
+        int commas = s.length() - s.replace(",", "").length();
+        int dots = s.length() - s.replace(".", "").length();
+
+        if (commas > 0 && dots > 0) {
+            int lastComma = s.lastIndexOf(",");
+            int lastDot = s.lastIndexOf(".");
+            if (lastDot > lastComma) {
+                s = s.replace(",", "");
+            } else {
+                s = s.replace(".", "").replace(",", ".");
+            }
+        } else if (commas > 0) {
+            if (commas == 1 && s.matches(".*,\\d{3}$")) {
+                s = s.replace(",", "");
+            } else {
+                s = s.replace(",", ".");
+            }
+        } else if (dots > 0) {
+            if (dots == 1 && s.matches(".*\\.\\d{3}$")) {
+                s = s.replace(".", "");
+            }
+        }
+
+        try {
+            return Double.parseDouble(s);
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
     private static List<PartnerTotalDto> extractFromCsv(File file) {
         List<PartnerTotalDto> results = new ArrayList<>();
         Double totalSst = 0.0;
@@ -40,7 +75,7 @@ public class ExcelHelper {
                     for (int i = 0; i < cols.length; i++) {
                         if (cols[i] == null) continue;
                         String header = cols[i].trim().replace("\"", "");
-                        if (header.equalsIgnoreCase("Mt SST") || header.equalsIgnoreCase("Total BR")) {
+                        if (header.equalsIgnoreCase("Mt SST") || header.equalsIgnoreCase("Total BR") || header.equalsIgnoreCase("Somme de Mt SST")) {
                             targetIndex = i;
                             hasValidColumn = true;
                             break;
@@ -49,10 +84,7 @@ public class ExcelHelper {
                 } else {
                     if (targetIndex < cols.length && cols[targetIndex] != null) {
                         try {
-                            String cleanNum = cols[targetIndex].replaceAll("[^\\d.,-]", "").replace(",", ".");
-                            if (!cleanNum.isEmpty() && !cleanNum.equals("-")) {
-                                totalSst += Double.parseDouble(cleanNum);
-                            }
+                            totalSst += parseMoney(cols[targetIndex]);
                         } catch (Exception ignored) {}
                     }
                 }
@@ -78,13 +110,10 @@ public class ExcelHelper {
     private static List<PartnerTotalDto> extractFromXlsx(File file) {
         List<PartnerTotalDto> results = new ArrayList<>();
 
-        // L'HERBA HNA: Utilisation dyal StreamingReader bach l'RAM ma-tcrachich (Anti-OOM)
         try (Workbook workbook = StreamingReader.builder()
                 .rowCacheSize(100)
                 .bufferSize(4096)
                 .open(file)) {
-
-            System.out.println("🚀 DÉMARRAGE EXTRACTION EXCEL STREAMING (Anti-OOM)...");
 
             for (Sheet sheet : workbook) {
                 String sheetName = sheet.getSheetName();
@@ -92,16 +121,13 @@ public class ExcelHelper {
                 boolean found = false;
 
                 try {
-                    // Kanjbedou ga3 les lignes d l'feuille (Zidna sur3a w n9esna RAM)
                     for (Row row : sheet) {
                         for (Cell cell : row) {
                             if (cell.getCellType() == CellType.STRING) {
                                 String cellValue = cell.getStringCellValue();
 
-                                // Ila l9ina "Total BR" f la cellule
-                                if (cellValue != null && cellValue.trim().equalsIgnoreCase("Total BR")) {
+                                if (cellValue != null && (cellValue.trim().equalsIgnoreCase("Total BR") || cellValue.trim().equalsIgnoreCase("Mt SST"))) {
 
-                                    // Nakhedou l'valeur li 3la limen (colonne suivante)
                                     Cell valueCell = row.getCell(cell.getColumnIndex() + 1);
 
                                     if (valueCell != null) {
@@ -109,27 +135,21 @@ public class ExcelHelper {
                                             totalBrValue = valueCell.getNumericCellValue();
                                         } else {
                                             String rawValue = valueCell.getStringCellValue();
-                                            if (rawValue != null) {
-                                                String cleanNum = rawValue.replaceAll("[^\\d.,-]", "").replace(",", ".");
-                                                if (!cleanNum.isEmpty() && !cleanNum.equals("-")) {
-                                                    totalBrValue = Double.parseDouble(cleanNum);
-                                                }
-                                            }
+                                            totalBrValue = parseMoney(rawValue);
                                         }
                                     }
                                     found = true;
                                     System.out.println("✅ " + sheetName + " -> " + totalBrValue);
-                                    break; // Tl9ina l'valeur, khrej mn l'boucle d les cellules
+                                    break;
                                 }
                             }
                         }
-                        if (found) break; // Tl9ina l'valeur, khrej mn l'boucle d les lignes
+                        if (found) break;
                     }
                 } catch (Exception ex) {
                     System.out.println("⚠️ Erreur mineure f " + sheetName + ": " + ex.getMessage());
                 }
 
-                // L'ALGORITHME LI BGHITI : Ila lqina Total BR, kan-ajoutiwha. Sinoun (ex: TCD), SKIP !
                 if (found) {
                     results.add(new PartnerTotalDto(sheetName, totalBrValue));
                 } else {
@@ -148,6 +168,13 @@ public class ExcelHelper {
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
             Sheet sheet = workbook.createSheet("Recap Total BR");
+
+            // 🚀 L'HERBA HNA: Création dyal Style pour forcer l'espace f les milliers f l'Excel
+            CellStyle numberStyle = workbook.createCellStyle();
+            DataFormat format = workbook.createDataFormat();
+            // Le format "# ##0.##" kay-obliger Excel y-dir espace f l'alaf (ex: 2 885 wla 2 885.5)
+            numberStyle.setDataFormat(format.getFormat("# ##0.##"));
+
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue("Partenaire (Feuille)");
             headerRow.createCell(1).setCellValue("Total BR");
@@ -158,10 +185,13 @@ public class ExcelHelper {
                 row.createCell(0).setCellValue(dto.getSheetName());
 
                 Cell valueCell = row.createCell(1);
-                if (dto.getTotalBr() != null) {
+                if (dto.getTotalBr() != null && dto.getTotalBr() != 0.0) {
                     valueCell.setCellValue(dto.getTotalBr());
+                    // Appliquer l'style dyal l'espace
+                    valueCell.setCellStyle(numberStyle);
                 } else {
-                    valueCell.setCellValue(0.0);
+                    // Ila kan 0 awla vide ndiro tiré bhalma tlbti f l'frontend
+                    valueCell.setCellValue("-");
                 }
             }
 
