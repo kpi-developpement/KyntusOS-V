@@ -5,11 +5,10 @@ services:
     build:
       context: ./excel-processor
       dockerfile: Dockerfile
-    # 🔥 Smiya jdida (V3) bach n-tfadaw ay fantôme f l'serveur
     container_name: kyntus_backend_v3_omega
     restart: unless-stopped
     ports:
-      # 🔥 Port Houbel (8779) li 9tare7ti, b3id 3la sda3
+      # L'Backend f l'port 8779
       - "8779:8081" 
     deploy:
       resources:
@@ -23,23 +22,17 @@ services:
       context: ./app-frontend
       dockerfile: Dockerfile
       args:
-        # 🔥 THE FIX: Hna fin kan-goulou l'Next.js y-nsa localhost w y-hder m3a 8779
+        # 🔥 THE LINK: Hna l'navigateur dyal l'utilisateur ghadi y-3ref fin mkhbe3 l'Backend
         - NEXT_PUBLIC_API_URL=http://10.10.10.50:8779
-    # 🔥 Smiya jdida (V3) l'Frontend
     container_name: kyntus_frontend_v3_omega
-    ports:
-      # 🔥 Port Houbel (3779) l'Frontend bach n-kounou haniyin 1000%
-      - "3779:3000"
-    environment:
-      # Hadi kat-b9a 8081 7it DNS interne d'Docker (pour Server-Side Rendering)
-      - BACKEND_URL=http://backend:8081
-    depends_on:
-      - backend
     restart: unless-stopped
+    ports:
+      # L'Frontend f l'port 3779
+      - "3779:3000"
     networks:
       - kyntus-v3-network
 
-# 🔥 Réseau jdid m3zoul
+# Déclaration dyal l'Réseau interne
 networks:
   kyntus-v3-network:
     driver: bridge

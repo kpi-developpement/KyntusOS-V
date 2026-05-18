@@ -6,7 +6,6 @@ import Background3D from "./threejs/background3D";
 import AnimatedCard from "./animation/card";
 import styles from "./page.module.css";
 
-// Interface bach TypeScript y3ref chno jay
 interface PartnerData {
   sheetName: string;
   totalBr: number;
@@ -17,7 +16,6 @@ export default function VentilPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: "error" | "success" | null }>({ text: "", type: null });
   
-  // Les states jdad dyal l'Affichage w l'Excel
   const [resultData, setResultData] = useState<PartnerData[] | null>(null);
   const [excelBase64, setExcelBase64] = useState<string | null>(null);
   
@@ -25,7 +23,17 @@ export default function VentilPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      
+      const MAX_FILE_SIZE = 50 * 1024 * 1024;
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        setMessage({ text: "LE FICHIER DÉPASSE LA LIMITE DE 50 MO", type: "error" });
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+
+      setFile(selectedFile);
       setMessage({ text: "", type: null });
     }
   };
@@ -46,16 +54,28 @@ export default function VentilPage() {
     formData.append("file", file);
 
     try {
-      // 🚀 VITESSE x4000: URL Relative! 
-      // Next.js (b l'Proxy li drna f next.config.ts) ghadi y-rediriha l'Spring Boot
-      const apiUrl = "/api/excel/process";
+      // 🚀 THE FIX: L'API url katji mn l'environnement (.env.local awla Docker args)
+      // F l'Production ghadi tkon: http://10.10.10.50:8779/api/excel/process
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "";
+      const apiUrl = backendUrl ? `${backendUrl}/api/excel/process` : "/api/excel/process";
 
       const response = await fetch(apiUrl, {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok) throw new Error("ÉCHEC DU TRAITEMENT DES DONNÉES");
+      if (!response.ok) {
+         let errMessage = "ÉCHEC DU TRAITEMENT DES DONNÉES";
+         const rawText = await response.text(); 
+         
+         try {
+           const errData = JSON.parse(rawText);
+           errMessage = errData.error || errMessage;
+         } catch {
+           errMessage = rawText || errMessage; 
+         }
+         throw new Error(errMessage);
+      }
 
       const json = await response.json();
       
@@ -63,40 +83,40 @@ export default function VentilPage() {
       setExcelBase64(json.fileBase64);
       setMessage({ text: "ANALYSE TERMINÉE AVEC SUCCÈS", type: "success" });
 
-    } catch (error: any) {
-      setMessage({ text: error.message, type: "error" });
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "UNE ERREUR INCONNUE EST SURVENUE";
+      setMessage({ text: errorMsg, type: "error" });
     } finally {
       setLoading(false);
     }
   };
 
-  // Fonction bach n-decodiw l'Base64 w n-téléchargéwh kima l'3ada
-  const handleDownloadExcel = () => {
+  const handleDownloadExcel = async () => {
     if (!excelBase64) return;
     
-    const byteCharacters = atob(excelBase64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    try {
+      const fetchResponse = await fetch(`data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${excelBase64}`);
+      const blob = await fetchResponse.blob();
+      
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute("download", "Recap_Ventilation_OS.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (err) {
+      setMessage({ text: "ERREUR LORS DU TÉLÉCHARGEMENT DU FICHIER", type: "error" });
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.setAttribute("download", "Recap_Ventilation_OS.xlsx");
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode?.removeChild(link);
   };
 
-  // Reset bach n3awdo l'khedma
   const handleReset = () => {
     setFile(null);
     setResultData(null);
     setExcelBase64(null);
     setMessage({ text: "", type: null });
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -110,7 +130,6 @@ export default function VentilPage() {
           <p className={styles.subtitle}>Ventilation OS</p>
         </motion.div>
         
-        {/* ILA MAZAL MA-JENA L'DATA -> AFFICHAGE UPLOAD */}
         {!resultData ? (
           <motion.div exit={{ opacity: 0, scale: 0.9 }}>
             <div className={styles.uploadBox} onClick={handleUploadClick}>
@@ -138,7 +157,6 @@ export default function VentilPage() {
           </motion.div>
         ) : (
           
-          /* ILA L'DATA WESLAT -> AFFICHAGE RÉSULTATS & TABLEAU */
           <motion.div className={styles.resultsContainer} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
             
             <div className={styles.tableWrapper}>

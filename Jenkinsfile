@@ -39,8 +39,8 @@ pipeline {
         stage('🛡️ Risk Management (Clean Up)') {
             steps {
                 script {
-                    echo "=> [ÉTAPE 4] Nettoyage dyal les vieilles images Docker..."
-                    sh "docker image prune -f"
+                    echo "=> [ÉTAPE 4] Nettoyage dyal les vieilles images w les réseaux orphelins..."
+                    sh "docker system prune -af --volumes"
                 }
             }
         }
@@ -49,10 +49,10 @@ pipeline {
     post {
         success {
             echo "✅ DÉPLOIEMENT KYNTUS OS-V RÉUSSI ABRO!"
-            echo "L'ancienne version t-ms7at w l-jdida kheddama f nafs les ports."
+            echo "L'ancienne version t-ms7at, w l'jdida khddama f port 3779 (Frontend) w 8779 (Backend)."
         }
         failure {
-            echo "❌ ÉCHEC DU DÉPLOIEMENT. Dkhol l'logs dyal Jenkins t-vérifier."
+            echo "❌ ERREUR F L'DÉPLOIEMENT. CHOUF LES LOGS DYAL JENKINS."
         }
     }
 }

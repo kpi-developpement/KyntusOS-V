@@ -4,6 +4,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# 🔥 L'HERBA HNA: Kan-st9blou l'variable mn docker-compose w kan-passiwha l'Build
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 RUN npm run build
 
 # Étape 2 : L'environnement de Production
